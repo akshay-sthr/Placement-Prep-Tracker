@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Placement Prep Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <section class="landing" id="landing" hidden>
+    <nav class="landing-nav">
+      <div class="landing-brand">
+        <img src="favicon.png" alt="logo" />
+        <span>Placement Prep Tracker</span>
+      </div>
+      <div class="landing-actions">
+        <button class="btn" id="landingLogin" type="button">Login</button>
+        <button class="btn primary" id="landingSignup" type="button">Create account</button>
+      </div>
+    </nav>
+
+    <header class="landing-hero">
+      <h1>Crack your placements, one problem at a time.</h1>
+      <p class="muted">
+        Track every DSA problem, revise with spaced repetition, log mock interviews,
+        and see how ready you really are.
+      </p>
+      <button class="btn primary landing-cta" id="landingStart" type="button">Get started, it's free</button>
+    </header>
+
+    <div class="landing-features">
+      <div class="landing-card">
+        <h3>Problem tracker</h3>
+        <p class="muted">Log problems by topic and difficulty, and mark the ones you got stuck on.</p>
+      </div>
+      <div class="landing-card">
+        <h3>Spaced repetition</h3>
+        <p class="muted">Get reminded to revisit problems at 1, 3, 7, 14, 30 and 60 days.</p>
+      </div>
+      <div class="landing-card">
+        <h3>Streaks and heatmap</h3>
+        <p class="muted">Build a daily habit and watch your activity grow.</p>
+      </div>
+      <div class="landing-card">
+        <h3>Mock interviews</h3>
+        <p class="muted">Record ratings and notes after every practice interview.</p>
+      </div>
+      <div class="landing-card">
+        <h3>Readiness score</h3>
+        <p class="muted">One score for DSA, mocks, profile and consistency, plus your weak topics.</p>
+      </div>
+      <div class="landing-card">
+        <h3>AI assistant (Coming Soon..)</h3>
+        <p class="muted">Ask for a study plan, interview practice or resume tips.</p>
+      </div>
+    </div>
+  </section>
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <button class="link" id="authBack" type="button">← Back to home</button>
+      <h1 style="padding-left: 4px;"> <img src="favicon.png" alt="logo"
+          style="height: 74px; width: 74px; display: flex; float: left; margin-top: 9px; margin-right: 6px;">Placement
+        Prep Tracker</h1>
+      <p class="muted" id="authSubtitle">Sign in to continue your placement journey.</p>
+      <form id="authForm">
+        <label id="nameWrap" hidden>Name<input name="name" autocomplete="name" /></label>
+
+        <label>Email
+          <div style="display:flex; gap:8px;">
+            <input name="email" id="authEmail" type="email" required autocomplete="email" />
+            <button class="btn" id="sendOtpBtn" type="button" hidden>Send OTP</button>
+          </div>
+        </label>
+
+        <!-- OTP Input (shown only in forgot password mode) -->
+        <label id="otpWrap" hidden>Enter 6-digit OTP<input name="otp" id="authOtp" type="text" maxlength="6"
+            placeholder="123456" /></label>
+
+        <!-- Standard password field for Login/Register -->
+        <label id="passWrap">Password<input name="password" id="authPass" type="password" minlength="8"
+            autocomplete="current-password" /></label>
+
+        <!-- New password field for Forgot Password mode -->
+        <label id="newPassWrap" hidden>New Password<input name="newPassword" id="authNewPass" type="password"
+            minlength="8" autocomplete="new-password" /></label>
+
+        <button class="btn primary" id="authSubmit" type="submit">Login</button>
+      </form>
+      <div class="form-error" id="authError"></div>
+
+      <div class="auth-switch"
+        style="display:flex; justify-content:space-between; align-items:center; margin-top:14px;">
+        <button class="link" id="authForgotBtn" type="button">Forgot password?</button>
+        <button class="btn" id="authMode" type="button">Create account</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="top" hidden>
+    <div class="wrap">
+      <div class="brand">Placement Prep</div>
+      <nav role="tablist" aria-label="Sections">
+        <button class="tab" role="tab" data-view="dashboard">Dashboard</button>
+        <button class="tab" role="tab" data-view="problems">Problems</button>
+        <button class="tab" role="tab" data-view="review">Review <span class="badge" id="dueBadge"
+            hidden>0</span></button>
+        <button class="tab" role="tab" data-view="mocks">Mock interviews</button>
+        <button class="tab" role="tab" data-view="readiness">Readiness</button>
+        <button class="tab" role="tab" data-view="assistant">AI Assistant</button>
+        <button class="tab" role="tab" data-view="profile">Profile</button>
+        <button class="tab" role="tab" id="adminTab" data-view="admin" hidden>Admin</button>
+      </nav>
+      <div class="nav-actions">
+        <span class="auth-user" id="authUser"></span>
+        <button class="btn icon-btn" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+        <button class="btn" id="logoutBtn">Logout</button>
+        <button class="btn primary" id="addProblem">Log a problem</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" role="alert" hidden></div>
+
+  <main class="wrap">
+    <!-- ================= Dashboard ================= -->
+    <section class="view stack" id="view-dashboard">
+      <div class="panel hero">
+        <div class="hero-side">
+          <div class="streak">
+            <span class="streak-num" id="streakNum">0</span>
+            <div>
+              <div class="streak-label">day streak</div>
+              <div class="muted small">Longest: <span id="longest">0</span> days</div>
+            </div>
+          </div>
+          <div class="due-note" id="dueNote"></div>
+        </div>
+        <div class="hero-main">
+          <div class="heat-wrap" id="heatWrap">
+            <div class="heat-months" id="heatMonths" aria-hidden="true"></div>
+            <div class="heat" id="heat" role="img" aria-label="Problems logged per day over the last 34 weeks"></div>
+          </div>
+          <div class="legend">Fewer <i class="cell l0"></i><i class="cell l1"></i><i class="cell l2"></i><i
+              class="cell l3"></i><i class="cell l4"></i> More</div>
+        </div>
+      </div>
+
+      <div class="panel" id="firstRun" hidden>
+        <h3>Nothing logged yet</h3>
+        <p class="muted" style="margin:6px 0 14px">Log the last problem you solved to start your streak. Each one is
+          scheduled for review the next day.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button class="btn primary" data-open-problem>Log a problem</button>
+          <button class="btn" id="seedBtn">Fill with sample data</button>
+        </div>
+      </div>
+
+      <div class="panel strip" id="strip">
+        <div>
+          <div class="value" id="sTotal">0</div>
+          <div class="label">Problems logged</div>
+        </div>
+        <div>
+          <div class="value" id="sWeek">0</div>
+          <div class="label">In the last 7 days</div>
+        </div>
+        <div>
+          <div class="value" id="sMastered">0</div>
+          <div class="label">Fully reviewed</div>
+        </div>
+        <div>
+          <div class="value" id="sMock">-</div>
+          <div class="label">Mock interview average</div>
+        </div>
+      </div>
+
+      <div class="charts" id="charts">
+        <div class="panel">
+          <h3>Problems by topic</h3>
+          <div class="chart-box" id="topicBox"><canvas id="topicChart"
+              aria-label="Bar chart of problems per topic"></canvas></div>
+          <div id="untouched"></div>
+        </div>
+        <div class="panel">
+          <h3>Difficulty split</h3>
+          <div class="chart-box" style="height:260px; margin-top:8px"><canvas id="diffChart"
+              aria-label="Doughnut chart of problems by difficulty"></canvas></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <h3>Recently logged</h3><button class="link" data-goto="problems">See all problems</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <tbody id="recentBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Problems ================= -->
+    <section class="view" id="view-problems" hidden>
+      <div class="section-head">
+        <h2>Problems</h2>
+      </div>
+      <div class="panel">
+        <div class="filters">
+          <input type="search" id="fQ" placeholder="Search by title" aria-label="Search by title" />
+          <select id="fTopic" aria-label="Filter by topic">
+            <option value="">All topics</option>
+          </select>
+          <select id="fDiff" aria-label="Filter by difficulty">
+            <option value="">All difficulties</option>
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+          <select id="fStatus" aria-label="Filter by result">
+            <option value="">All results</option>
+            <option value="solved">Solved on my own</option>
+            <option value="stuck">Needed help</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Problem</th>
+                <th>Topic</th>
+                <th>Difficulty</th>
+                <th>Result</th>
+                <th>Solved on</th>
+                <th>Next review</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="problemBody"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="problemEmpty" hidden></p>
+      </div>
+    </section>
+
+    <!-- ================= Review ================= -->
+    <section class="view" id="view-review" hidden>
+      <div class="section-head">
+        <div>
+          <h2>Review queue</h2>
+          <p class="muted small" id="reviewSub"></p>
+        </div>
+      </div>
+      <div id="reviewList"></div>
+    </section>
+
+    <!-- ================= Mock interviews ================= -->
+    <section class="view stack" id="view-mocks" hidden>
+      <div class="section-head" style="margin-bottom:0">
+        <h2>Mock interviews</h2><button class="btn primary" id="addMock">Log a mock interview</button>
+      </div>
+      <div class="panel" id="mockChartPanel" hidden>
+        <h3>Rating over time</h3>
+        <div class="chart-box" style="height:200px; margin-top:8px"><canvas id="mockChart"
+            aria-label="Line chart of mock interview ratings"></canvas></div>
+      </div>
+      <div id="mockList"></div>
+    </section>
+
+    <!-- ================= Readiness ================= -->
+    <section class="view stack" id="view-readiness" hidden>
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Placement readiness</h2>
+            <p class="muted small">A transparent progress estimate based on your activity, profile, and mock interviews.
+            </p>
+          </div>
+        </div>
+        <div class="feature-grid" id="readinessCards"></div>
+        <div class="panel" style="margin-top:14px">
+          <h3>Weak topics</h3>
+          <div id="weakTopics" class="small muted">Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Profile ================= -->
+    <section class="view stack" id="view-profile" hidden>
+      <div class="panel">
+        <h2>My profile</h2>
+        <p class="muted small">Keep your placement profile updated for personalized guidance.</p>
+        <form id="profileForm" class="profile-grid" style="margin-top:16px">
+          <label>Name<input name="name" required></label>
+          <label>College<input name="college"></label>
+          <label>Graduation year<input name="graduationYear" type="number"></label>
+          <label>Target role<input name="targetRole" placeholder="Full Stack Developer"></label>
+          <label style="grid-column:1/-1">Skills<input name="skills" placeholder="C++, JavaScript, React, SQL"></label>
+          <label style="grid-column:1/-1">Bio<textarea name="bio"></textarea></label>
+          <div><button class="btn primary">Save profile</button></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= AI Assistant ================= -->
+    <section class="view stack" id="view-assistant" hidden>
+      <div class="panel">
+        <h2>AI placement assistant</h2>
+        <p class="muted small">Ask for study plans, interview practice, resume guidance, or weak-topic revision.</p>
+        <div class="assistant" style="margin-top:14px">
+          <textarea id="aiMessage"
+            placeholder="Example: Make me a 14-day plan for a full-stack developer interview."></textarea>
+          <button class="btn primary" id="askAI">Ask AI</button>
+        </div>
+        <div id="aiAnswer" class="chat-answer" hidden></div>
+        <div style="margin-top:14px"><button class="btn" id="generatePlan">Generate 14-day study plan</button></div>
+        <div id="studyPlan" class="small" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <!-- ================= Admin ================= -->
+    <section class="view stack" id="view-admin" hidden>
+      <div class="panel">
+        <h2>Admin dashboard</h2>
+        <p class="muted small">Platform-level overview for the placement administrator.</p>
+        <div class="feature-grid" id="adminMetrics" style="margin-top:14px"></div>
+      </div>
+      <div class="panel">
+        <h3>Recent students</h3>
+        <div id="adminStudents" style="margin-top:10px"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= Dialogs ================= -->
+  <dialog id="problemDialog" aria-labelledby="problemDialogTitle">
+    <form id="problemForm" class="dlg">
+      <h3 id="problemDialogTitle">Log a problem</h3>
+      <input type="hidden" name="pid" />
+      <label>Title <input name="title" required maxlength="200" placeholder="Two Sum" /></label>
+      <label>Link <input name="url" type="url" placeholder="https://leetcode.com/problems/two-sum/" /></label>
+      <div class="row2">
+        <label>Platform
+          <input name="platform" list="platforms" value="LeetCode" maxlength="40" />
+          <datalist id="platforms">
+            <option>LeetCode</option>
+            <option>GeeksforGeeks</option>
+            <option>Codeforces</option>
+            <option>HackerRank</option>
+            <option>CodeChef</option>
+            <option>Interview question</option>
+          </datalist>
+        </label>
+        <label>Solved on <input name="solvedDate" type="date" required /></label>
+      </div>
+      <div class="row2">
+        <label>Topic <select name="topic" id="topicSelect"></select></label>
+        <label>Difficulty
+          <select name="difficulty">
+            <option>Easy</option>
+            <option selected>Medium</option>
+            <option>Hard</option>
+          </select>
+        </label>
+      </div>
+      <label>Result
+        <select name="status">
+          <option value="solved">Solved on my own</option>
+          <option value="stuck">Needed help or hints</option>
+        </select>
+      </label>
+      <label>Notes <textarea name="notes" maxlength="2000"
+          placeholder="Key idea, mistakes, time complexity..."></textarea></label>
+      <div class="form-error" id="problemError" role="alert"></div>
+      <div class="dlg-actions">
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn primary">Save problem</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="mockDialog" aria-labelledby="mockDialogTitle">
+    <form id="mockForm" class="dlg">
+      <h3 id="mockDialogTitle">Log a mock interview</h3>
+      <div class="row2">
+        <label>Date <input name="date" type="date" required /></label>
+        <label>Type
+          <select name="type">
+            <option>DSA</option>
+            <option>Technical</option>
+            <option>System Design</option>
+            <option>HR</option>
+            <option>Aptitude</option>
+            <option>Other</option>
+          </select>
+        </label>
+      </div>
+      <div class="row2">
+        <label>Company or interviewer <input name="company" maxlength="80" /></label>
+        <label>Rating
+          <select name="rating">
+            <option value="1">1 - Struggled</option>
+            <option value="2">2</option>
+            <option value="3" selected>3 - Okay</option>
+            <option value="4">4</option>
+            <option value="5">5 - Strong</option>
+          </select>
+        </label>
+      </div>
+      <label>Notes <textarea name="notes" maxlength="3000"
+          placeholder="What went well, what to improve..."></textarea></label>
+      <div class="form-error" id="mockError" role="alert"></div>
+      <div class="dlg-actions">
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn primary">Save mock interview</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <footer class="myFooter">
+    <p><span id="currentYear"></span> Copyright &copy; Made with Akshay | All rights reserved</p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "placement-tracker",
+  "version": "2.0.0",
+  "description": "Major-project placement preparation platform with JWT auth, profiles, readiness scoring, mock interviews, AI assistant, admin dashboard, and CI/CD.",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.5.0",
+    "nodemailer": "^10.0.10"
+  }
+}

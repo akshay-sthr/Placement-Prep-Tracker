@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: placement-tracker
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5-mini
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
