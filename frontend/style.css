@@ -1437,7 +1437,7 @@ body.guest .menu-user { display: none; }
   .mobile-only { display: inline-flex; }
   body.guest #profileIcon { display: none; }
 }
-/* ---------- Profile card ---------- */
+/* Profile card */
 .profile-card { width: 100%; max-width: 860px; margin: 0 auto; }
 .pc-head { display: flex; align-items: center; gap: 16px; }
 .pc-avatar {
