@@ -945,8 +945,7 @@ const initialHash = location.hash.slice(1);
 if (token) showView(VIEWS.includes(initialHash) ? initialHash : "dashboard");
 bootstrapAuth();
 
-// ---------- Guest mode ----------
-// A guest sees an empty tracker. Anything that needs an account opens the login popup.
+
 function guestData() {
   const days = [];
   for (let i = 237; i >= 0; i--) {
@@ -998,7 +997,6 @@ function closeLogin() {
   history.replaceState(null, "", "#" + state.view);
 }
 
-// Runs before every other click handler: blocks account-only buttons for guests
 document.addEventListener("click", (e) => {
   if (!guest) return;
   const blocked = e.target.closest("#addProblem, [data-open-problem], #addMock, #seedBtn, #askAI, #generatePlan");
@@ -1014,7 +1012,7 @@ $("#guestLogin").addEventListener("click", () => openLogin("login"));
 $("#guestSignup").addEventListener("click", () => openLogin("register"));
 $("#authClose").addEventListener("click", closeLogin);
 $("#authScreen").addEventListener("click", (e) => {
-  if (guest && e.target === e.currentTarget) closeLogin();   // click on the dark backdrop
+  if (guest && e.target === e.currentTarget) closeLogin();   
 });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && guest && !$("#authScreen").hidden) closeLogin();
