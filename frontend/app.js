@@ -1003,7 +1003,6 @@ function closeLogin() {
   history.replaceState(null, "", "#" + state.view);
 }
 
-// Runs before every other click handler: blocks account-only buttons for guests
 document.addEventListener("click", (e) => {
   if (!guest) return;
   const blocked = e.target.closest("#addProblem, [data-open-problem], #addMock, #seedBtn, #askAI, #generatePlan");
@@ -1019,7 +1018,7 @@ $("#guestLogin").addEventListener("click", () => openLogin("login"));
 $("#guestSignup").addEventListener("click", () => openLogin("register"));
 $("#authClose").addEventListener("click", closeLogin);
 $("#authScreen").addEventListener("click", (e) => {
-  if (guest && e.target === e.currentTarget) closeLogin();   // click on the dark backdrop
+  if (guest && e.target === e.currentTarget) closeLogin();   
 });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && guest && !$("#authScreen").hidden) closeLogin();
