@@ -134,7 +134,7 @@ async function loadAll() {
 }
 
 async function loadProblems() {
-    if (guest) return;
+  if (guest) return;
   try {
     state.problems = await api(problemsPath());
     renderProblems();
@@ -353,11 +353,11 @@ function renderMockChart() {
   if (charts.mock) charts.mock.destroy();
   charts.mock = new Chart($("#mockChart"), { type: "line", data: { labels: mocks.map((m) => fmtDate(m.date)), datasets: [{ data: mocks.map((m) => m.rating), borderColor: v("--accent"), backgroundColor: v("--accent"), tension: 0.25, pointRadius: 4 }], }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: v("--line") } }, x: { grid: { display: false } } }, }, });
 } function showView(name) {
-    if (guest && !GUEST_VIEWS.includes(name)) return openLogin("login");
+  if (guest && !GUEST_VIEWS.includes(name)) return openLogin("login");
   state.view = name; $$(".view").forEach((el) => (el.hidden = el.id !== `view-${name}`));
   $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.view === name)));
 
-   if (location.hash !== "#" + name) history.pushState(null, "", "#" + name);   //changes the URL to something like 
+  if (location.hash !== "#" + name) history.pushState(null, "", "#" + name);   //changes the URL to something like 
   //http://localhost:3000/#problems
 
   if (name === "dashboard") renderCharts();
@@ -776,6 +776,7 @@ $("#logoutBtn").addEventListener("click", () => {
 });
 
 function updateAuthUI() {
+  $("#profileIcon").textContent = (currentUser?.name || "?").trim().charAt(0).toUpperCase();
   $("#authUser").textContent = currentUser ? `${currentUser.name} · ${currentUser.role}` : "";
   const adminTab = $("#adminTab");
   if (adminTab) {
@@ -795,6 +796,8 @@ async function loadProfile() {
     f.targetRole.value = currentUser.targetRole || "";
     f.skills.value = (currentUser.skills || []).join(", ");
     f.bio.value = currentUser.bio || "";
+    renderProfileCard();
+    setProfileMode(profileIsFilled(currentUser) ? "card" : "edit");
   } catch (err) {
     handleError(err);
   }
@@ -809,6 +812,8 @@ $("#profileForm").addEventListener("submit", async (e) => {
     currentUser = r.user;
     updateAuthUI();
     toast("Profile updated");
+    renderProfileCard();
+    setProfileMode("card");
   } catch (err) {
     handleError(err);
   }
@@ -945,7 +950,7 @@ const initialHash = location.hash.slice(1);
 if (token) showView(VIEWS.includes(initialHash) ? initialHash : "dashboard");
 bootstrapAuth();
 
-// ---------- Guest mode ----------
+//  Guest mode 
 // A guest sees an empty tracker. Anything that needs an account opens the login popup.
 function guestData() {
   const days = [];
@@ -1019,3 +1024,85 @@ $("#authScreen").addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && guest && !$("#authScreen").hidden) closeLogin();
 });
+//  Mobile menu 
+const menuBtn = $("#menuBtn");
+const menuDropdown = $("#menuDropdown");
+
+function closeMenu() {
+  menuDropdown.hidden = true;
+  menuBtn.setAttribute("aria-expanded", "false");
+}
+
+menuBtn.addEventListener("click", () => {
+  const opening = menuDropdown.hidden;
+  menuDropdown.hidden = !opening;
+  menuBtn.setAttribute("aria-expanded", String(opening));
+});
+
+menuDropdown.addEventListener("click", (e) => {
+  const item = e.target.closest("[data-menu]");
+  if (!item) return;
+  closeMenu();
+  const action = item.dataset.menu;
+  if (action === "log") $("#addProblem").click();        
+  else if (action === "logout") $("#logoutBtn").click();
+  else if (action === "login") openLogin("login");
+  else if (action === "signup") openLogin("register");
+});
+
+$("#profileIcon").addEventListener("click", () => showView("profile"));
+
+document.addEventListener("click", (e) => { if (!e.target.closest(".menu-wrap")) closeMenu(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+window.matchMedia("(min-width: 761px)").addEventListener("change", closeMenu);
+
+
+//  Profile card 
+function profileIsFilled(u) {
+  return !!(u.college || u.graduationYear || u.targetRole || (u.skills || []).length || u.bio);
+}
+
+function profileCompletion(u) {
+  const checks = [u.name, u.college, u.graduationYear, u.targetRole, (u.skills || []).length, u.bio];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+function setProfileMode(mode) {
+  $("#profileCard").hidden = mode !== "card";
+  $("#profileEditPanel").hidden = mode !== "edit";
+  $("#profileCancel").hidden = !(currentUser && profileIsFilled(currentUser));
+}
+
+function renderProfileCard() {
+  const u = currentUser;
+  if (!u) return;
+
+  $("#pcAvatar").textContent = (u.name || "?").trim().charAt(0).toUpperCase();
+  $("#pcName").textContent = u.name || "";
+  $("#pcEmail").textContent = u.email || "";
+  $("#pcBio").textContent = u.bio || "";
+  $("#pcBio").hidden = !u.bio;
+
+  const icon = (paths) =>
+    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+  const ROLE = '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>';
+  const COLLEGE = '<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>';
+  const YEAR = '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>';
+
+  const rows = [];
+  if (u.targetRole) rows.push(icon(ROLE) + `<span>${esc(u.targetRole)}</span>`);
+  if (u.college) rows.push(icon(COLLEGE) + `<span>${esc(u.college)}</span>`);
+  if (u.graduationYear) rows.push(icon(YEAR) + `<span>Graduating in ${esc(String(u.graduationYear))}</span>`);
+  $("#pcList").innerHTML = rows.map((r) => `<li>${r}</li>`).join("");
+
+  $("#pcSkills").innerHTML = (u.skills || []).map((s) => `<span class="pc-skill">${esc(s)}</span>`).join("");
+
+  const pct = profileCompletion(u);
+  $("#pcRingFg").style.strokeDashoffset = String(326.73 * (1 - pct / 100));
+  $("#pcRingText").textContent = pct + "%";
+  $("#pcComplete").hidden = pct === 100;
+}
+
+$("#pcEdit").addEventListener("click", () => setProfileMode("edit"));
+$("#pcComplete").addEventListener("click", () => setProfileMode("edit"));
+$("#profileCancel").addEventListener("click", () => loadProfile());   // reset the form and go back to the card

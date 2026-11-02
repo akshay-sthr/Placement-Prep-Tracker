@@ -128,6 +128,23 @@
         <button class="btn guest-only" id="guestLogin" type="button">Login</button>
         <button class="btn primary guest-only" id="guestSignup" type="button">Create account</button>
         <button class="btn primary" id="addProblem">Log a problem</button>
+        <button class="btn mobile-only" id="profileIcon" type="button" title="My profile"
+          aria-label="My profile">A</button>
+        <div class="menu-wrap mobile-only">
+          <button class="btn icon-btn" id="menuBtn" type="button" aria-label="Menu" aria-haspopup="true"
+            aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div class="menu-dropdown" id="menuDropdown" hidden>
+            <button class="menu-item menu-guest" type="button" data-menu="login">Login</button>
+            <button class="menu-item menu-guest" type="button" data-menu="signup">Create account</button>
+            <button class="menu-item" type="button" data-menu="log">Log a problem</button>
+            <button class="menu-item menu-user" type="button" data-menu="logout">Logout</button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -135,7 +152,7 @@
   <div class="banner" id="banner" role="alert" hidden></div>
 
   <main class="wrap">
-    <!-- ================= Dashboard ================= -->
+    <!-- Dashboard -->
     <section class="view stack" id="view-dashboard">
       <div class="panel hero">
         <div class="hero-side">
@@ -213,7 +230,7 @@
       </div>
     </section>
 
-    <!-- ================= Problems ================= -->
+    <!-- Problems -->
     <section class="view" id="view-problems" hidden>
       <div class="section-head">
         <h2>Problems</h2>
@@ -256,7 +273,7 @@
       </div>
     </section>
 
-    <!-- ================= Review ================= -->
+    <!-- Review -->
     <section class="view" id="view-review" hidden>
       <div class="section-head">
         <div>
@@ -267,7 +284,7 @@
       <div id="reviewList"></div>
     </section>
 
-    <!-- ================= Mock interviews ================= -->
+    <!-- Mock interviews -->
     <section class="view stack" id="view-mocks" hidden>
       <div class="section-head" style="margin-bottom:0">
         <h2>Mock interviews</h2><button class="btn primary" id="addMock">Log a mock interview</button>
@@ -280,7 +297,7 @@
       <div id="mockList"></div>
     </section>
 
-    <!-- ================= Readiness ================= -->
+    <!-- Readiness -->
     <section class="view stack" id="view-readiness" hidden>
       <div class="panel">
         <div class="section-head">
@@ -298,9 +315,43 @@
       </div>
     </section>
 
-    <!-- ================= Profile ================= -->
-    <section class="view stack" id="view-profile" hidden>
-      <div class="panel">
+    <!-- Profile -->
+        <section class="view stack" id="view-profile" hidden>
+
+      <!-- Profile card (shown once the user has filled in details) -->
+      <div class="panel profile-card" id="profileCard" hidden>
+        <div class="pc-head">
+          <div class="pc-avatar" id="pcAvatar">A</div>
+          <div class="pc-id">
+            <h2 id="pcName"></h2>
+            <p class="muted small" id="pcEmail"></p>
+          </div>
+          <button class="btn icon-btn" id="pcEdit" type="button" title="Edit profile" aria-label="Edit profile">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+        </div>
+
+        <div class="pc-body">
+          <div class="pc-main">
+            <p class="pc-bio" id="pcBio"></p>
+            <ul class="pc-list" id="pcList"></ul>
+            <div class="pc-skills" id="pcSkills"></div>
+          </div>
+          <div class="pc-ring">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="10"/>
+              <circle id="pcRingFg" cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="10"
+                stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+              <text id="pcRingText" x="60" y="67" text-anchor="middle" font-size="24" font-weight="700" fill="currentColor">0%</text>
+            </svg>
+            <span class="muted small">Profile completion</span>
+            <button class="link" id="pcComplete" type="button" hidden>Complete your profile</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <div class="panel" id="profileEditPanel">
         <h2>My profile</h2>
         <p class="muted small">Keep your placement profile updated for personalized guidance.</p>
         <form id="profileForm" class="profile-grid" style="margin-top:16px">
@@ -310,12 +361,15 @@
           <label>Target role<input name="targetRole" placeholder="Full Stack Developer"></label>
           <label style="grid-column:1/-1">Skills<input name="skills" placeholder="C++, JavaScript, React, SQL"></label>
           <label style="grid-column:1/-1">Bio<textarea name="bio"></textarea></label>
-          <div><button class="btn primary">Save profile</button></div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn primary">Save profile</button>
+            <button class="btn" type="button" id="profileCancel" hidden>Cancel</button>
+          </div>
         </form>
       </div>
     </section>
 
-    <!-- ================= AI Assistant ================= -->
+    <!-- AI Assistant -->
     <section class="view stack" id="view-assistant" hidden>
       <div class="panel">
         <h2>AI placement assistant</h2>
@@ -331,7 +385,7 @@
       </div>
     </section>
 
-    <!-- ================= Admin ================= -->
+    <!-- Admin -->
     <section class="view stack" id="view-admin" hidden>
       <div class="panel">
         <h2>Admin dashboard</h2>
@@ -345,7 +399,7 @@
     </section>
   </main>
 
-  <!-- ================= Dialogs ================= -->
+  <!-- Dialogs -->
   <dialog id="problemDialog" aria-labelledby="problemDialogTitle">
     <form id="problemForm" class="dlg">
       <h3 id="problemDialogTitle">Log a problem</h3>
