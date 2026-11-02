@@ -35,6 +35,8 @@ const charts = {};
 
 let token = localStorage.getItem("token");
 let currentUser = null;
+let guest = false;
+const GUEST_VIEWS = ["dashboard", "problems", "review", "mocks"];
 
 function setToken(t) {
   token = t;
@@ -42,7 +44,7 @@ function setToken(t) {
   else localStorage.removeItem("token");
 }
 
-// ---------- Dates (plain YYYY-MM-DD strings, in the user's own timezone) ----------
+//  Dates (plain YYYY-MM-DD strings, in the user's own timezone) 
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -50,7 +52,7 @@ function todayStr() {
 const daysBetween = (a, b) => Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000);
 const fmtDate = (s) => new Date(s + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
-// ---------- API ----------
+//  API 
 async function api(path, opts = {}) {
   const url = `/api${path}${path.includes("?") ? "&" : "?"}today=${todayStr()}`;
   const headers = { "Content-Type": "application/json" };
@@ -104,7 +106,7 @@ function handleError(err) {
   }
 }
 
-// ---------- Loading ----------
+//  Loading 
 function problemsPath() {
   const p = new URLSearchParams();
   const q = $("#fQ").value.trim();
@@ -117,6 +119,8 @@ function problemsPath() {
 }
 
 async function loadAll() {
+  if (guest) { Object.assign(state, guestData()); setBanner(null); renderAll(); return; }
+
   try {
     const [stats, problems, due, mocks] = await Promise.all([
       api("/stats"), api(problemsPath()), api("/reviews/due"), api("/mocks"),
@@ -130,6 +134,7 @@ async function loadAll() {
 }
 
 async function loadProblems() {
+    if (guest) return;
   try {
     state.problems = await api(problemsPath());
     renderProblems();
@@ -140,7 +145,7 @@ async function loadProblems() {
 
 setInterval(() => { if (state.dbDown) loadAll(); }, 5000);
 
-// ---------- Rendering ----------
+//  Rendering 
 function dueText(p) {
   if (p.nextReview == null) return '<span class="muted">Fully reviewed</span>';
   const diff = daysBetween(state.stats ? state.stats.today : todayStr(), p.nextReview);
@@ -348,10 +353,11 @@ function renderMockChart() {
   if (charts.mock) charts.mock.destroy();
   charts.mock = new Chart($("#mockChart"), { type: "line", data: { labels: mocks.map((m) => fmtDate(m.date)), datasets: [{ data: mocks.map((m) => m.rating), borderColor: v("--accent"), backgroundColor: v("--accent"), tension: 0.25, pointRadius: 4 }], }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: v("--line") } }, x: { grid: { display: false } } }, }, });
 } function showView(name) {
+    if (guest && !GUEST_VIEWS.includes(name)) return openLogin("login");
   state.view = name; $$(".view").forEach((el) => (el.hidden = el.id !== `view-${name}`));
   $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.view === name)));
 
-  history.pushState(null, "", "#" + name);    //changes the URL to something like 
+   if (location.hash !== "#" + name) history.pushState(null, "", "#" + name);   //changes the URL to something like 
   //http://localhost:3000/#problems
 
   if (name === "dashboard") renderCharts();
@@ -396,7 +402,7 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-// ---------- Problem dialog ----------
+//  Problem dialog 
 const problemDialog = $("#problemDialog");
 const problemForm = $("#problemForm");
 
@@ -497,7 +503,7 @@ problemForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ---------- Mock dialog ----------
+//  Mock dialog 
 const mockDialog = $("#mockDialog");
 const mockForm = $("#mockForm");
 
@@ -527,7 +533,7 @@ mockForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ---------- Misc wiring ----------
+//  Misc wiring 
 $("#addProblem").addEventListener("click", () => openProblemDialog());
 
 $("#seedBtn").addEventListener("click", async () => {
@@ -548,7 +554,7 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () 
   if (state.view === "mocks") renderMockChart();
 });
 
-// ---------- Auth and Extras ----------
+//  Auth and Extras 
 function showApp() {
   $("#landing").hidden = true;
   $("#authScreen").hidden = true;
@@ -624,7 +630,7 @@ function setAuthMode(mode) {
     authOtp.required = false;
     authSubmit.textContent = "Login";
     authSubtitle.textContent = "Sign in to continue your placement journey.";
-    authModeBtn.textContent = "Create account";
+    authModeBtn.textContent = "New User? Create account";
     authForgotBtn.hidden = false;
   }
 }
@@ -878,6 +884,7 @@ $("#themeToggle").addEventListener("click", () => {
 });
 
 async function startAuthenticated() {
+  leaveGuest();
   showApp();
   updateAuthUI();
   setAuthMode(false);
@@ -902,8 +909,8 @@ async function bootstrapAuth() {
     routePublic();
   }
 }
-// ---------- Landing page ----------
-// ---------- Landing page + public routes (#home, #login, #signup) ----------
+//  Landing page 
+//  Landing page + public routes (#home, #login, #signup) 
 function showLanding() {
   $("#landing").hidden = false;
   $("#authScreen").hidden = true;
@@ -914,6 +921,8 @@ function showLanding() {
 // Shows the right public page for the current URL hash
 function routePublic() {
   const h = location.hash.slice(1);
+  if (VIEWS.includes(h)) return enterGuest(h);   // logged-out visitors browse as guests
+  leaveGuest();
   const page = h === "login" || h === "signup" ? h : "home";
   if (page === "login") { showAuth(); setAuthMode("login"); }
   else if (page === "signup") { showAuth(); setAuthMode("register"); }
@@ -931,7 +940,82 @@ $("#landingSignup").addEventListener("click", () => goPublic("signup"));
 $("#landingStart").addEventListener("click", () => goPublic("signup"));
 $("#authBack").addEventListener("click", () => goPublic("home"));
 
-// ---------- Initialize ----------
+//  Initialize 
 const initialHash = location.hash.slice(1);
 if (token) showView(VIEWS.includes(initialHash) ? initialHash : "dashboard");
 bootstrapAuth();
+
+// ---------- Guest mode ----------
+// A guest sees an empty tracker. Anything that needs an account opens the login popup.
+function guestData() {
+  const days = [];
+  for (let i = 237; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push({
+      date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
+      count: 0,
+    });
+  }
+  return {
+    stats: {
+      today: todayStr(), total: 0, stuck: 0, mastered: 0, dueCount: 0, last7: 0,
+      byDifficulty: { Easy: 0, Medium: 0, Hard: 0 }, byTopic: [],
+      streak: { current: 0, longest: 0 }, days, mockCount: 0, avgMock: null,
+      recent: [], reviewSteps: 6,
+    },
+    problems: [], due: [], mocks: [], dbDown: false,
+  };
+}
+
+function enterGuest(view) {
+  guest = true;
+  document.body.classList.add("guest");
+  $("#landing").hidden = true;
+  $("#authScreen").hidden = true;
+  $("#authScreen").classList.remove("overlay");
+  $(".top").hidden = false;
+  document.querySelectorAll(".view").forEach(v => v.hidden = true);
+  showView(GUEST_VIEWS.includes(view) ? view : "dashboard");
+  loadAll();
+}
+
+function leaveGuest() {
+  guest = false;
+  document.body.classList.remove("guest");
+  $("#authScreen").classList.remove("overlay");
+}
+
+function openLogin(mode = "login") {
+  $("#authScreen").classList.add("overlay");
+  $("#authScreen").hidden = false;
+  setAuthMode(mode);
+}
+
+function closeLogin() {
+  $("#authScreen").hidden = true;
+  $("#authScreen").classList.remove("overlay");
+  history.replaceState(null, "", "#" + state.view);
+}
+
+// Runs before every other click handler: blocks account-only buttons for guests
+document.addEventListener("click", (e) => {
+  if (!guest) return;
+  const blocked = e.target.closest("#addProblem, [data-open-problem], #addMock, #seedBtn, #askAI, #generatePlan");
+  if (blocked) {
+    e.preventDefault();
+    e.stopPropagation();
+    openLogin("login");
+  }
+}, true);
+
+$("#landingGuest").addEventListener("click", () => enterGuest("dashboard"));
+$("#guestLogin").addEventListener("click", () => openLogin("login"));
+$("#guestSignup").addEventListener("click", () => openLogin("register"));
+$("#authClose").addEventListener("click", closeLogin);
+$("#authScreen").addEventListener("click", (e) => {
+  if (guest && e.target === e.currentTarget) closeLogin();   // click on the dark backdrop
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && guest && !$("#authScreen").hidden) closeLogin();
+});

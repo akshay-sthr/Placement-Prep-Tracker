@@ -1,6 +1,5 @@
 const crypto = require("crypto");
 const { JWT_SECRET } = require("../config/env");
-
 const b64url = (value) => Buffer.from(value).toString("base64url");
 
 const signToken = (user) => {

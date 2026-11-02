@@ -234,7 +234,7 @@ main.wrap {
 .top .wrap {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
   padding-bottom: 4px;
   min-width: 0;
@@ -1333,3 +1333,38 @@ body:has(#authScreen:not([hidden])) {
   .landing-brand img { height: 32px; width: 32px; }
   .landing-hero { margin-top: 32px; }
 }
+/* ---------- Guest mode ---------- */
+.guest-only { display: none; }
+body.guest .guest-only { display: inline-flex; }
+body.guest #logoutBtn,
+body.guest #authUser { display: none; }
+
+.landing-cta { margin: 6px; }
+.auth-card { position: relative; }
+.auth-close {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: 0;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.auth-close:hover { color: var(--ink); }
+
+/* Login popup shown over the guest dashboard */
+.auth-screen.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow-y: auto;
+  background: rgba(8, 12, 24, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.auth-screen.overlay .auth-close { display: block; }
+.auth-screen.overlay #authBack { display: none; }
