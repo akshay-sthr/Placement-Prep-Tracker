@@ -1311,7 +1311,7 @@ body:has(#authScreen:not([hidden])) {
     padding: 18px;
   }
 }
-/* ---------- Landing page ---------- */
+/* Landing page  */
 .landing { min-height: 100vh; padding: 0 24px 48px; background: var(--bg); color: var(--ink); }
 .landing-nav { max-width: 1100px; margin: 0 auto; padding: 18px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .landing-brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 1.15rem; }
